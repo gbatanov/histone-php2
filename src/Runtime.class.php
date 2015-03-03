@@ -2,8 +2,8 @@
 
 class Histone_Runtime {
 
-	private $thisObj;
-	private $baseURI;
+	public $thisObj;
+	public $baseURI;
 	private $scopes = array();
 
 	public function __construct($baseURI, $thisObj) {
@@ -14,10 +14,6 @@ class Histone_Runtime {
 
 	public function __destruct() {
 		$this->popScope(0);
-	}
-
-	public function getThis() {
-		return $this->thisObj;
 	}
 
 	public function pushScope($scope) {
