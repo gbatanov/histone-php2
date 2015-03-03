@@ -17,7 +17,8 @@ class Histone_Template {
 	}
 
 	function render($ret, $thisObj) {
-		$ret(Histone_Processor::process($this->template, $thisObj));
+		$runtime = new Histone_Runtime($this->baseURI, $thisObj);
+		$ret(Histone_Processor::process($this->template, $runtime));
 	}
 
 }
