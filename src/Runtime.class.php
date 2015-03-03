@@ -4,7 +4,7 @@ class Histone_Runtime {
 
 	private $thisObj;
 	private $baseURI;
-	private $scopes = [];
+	private $scopes = array();
 
 	public function __construct($baseURI, $thisObj) {
 		$this->pushScope(0);
@@ -22,9 +22,10 @@ class Histone_Runtime {
 
 	public function pushScope($scope) {
 		$scopes = &$this->scopes;
-		if (!array_key_exists($scope, $scopes))
-			$scopes[$scope] = [];
-		array_unshift($scopes[$scope], []);
+		if (!array_key_exists($scope, $scopes)) {
+			$scopes[$scope] = array();
+		}
+		array_unshift($scopes[$scope], array());
 	}
 
 	public function getVarIndex() {
@@ -43,8 +44,9 @@ class Histone_Runtime {
 
 	public function popScope($scope) {
 		array_pop($this->scopes[$scope]);
-		if (!count($this->scopes[$scope]))
+		if (!count($this->scopes[$scope])) {
 			unset($this->scopes[$scope]);
+		}
 	}
 
 }
