@@ -26,5 +26,3 @@ Histone_RTTI::registerMember('Histone_Method', 'toString', function() { return '
 Histone_RTTI::registerMember('Histone_Method', 'toBoolean', function() { return true; });
 Histone_RTTI::registerMember('Histone_Method', 'isCallable', function() { return true; });
 Histone_RTTI::registerMember('Histone_Method', 'toJSON', function() { return '[Histone_Method]'; });
-
-
