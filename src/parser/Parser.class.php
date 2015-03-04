@@ -60,7 +60,7 @@ class Histone_Parser {
 				}
 			}
 		}
-		return [Histone_Constants::T_GET, [Histone_Constants::T_GLOBAL], $name];
+		return [Histone_Constants::T_METHOD, [Histone_Constants::T_GLOBAL], $name];
 	}
 
 	private static function escapeStringLiteral($string) {

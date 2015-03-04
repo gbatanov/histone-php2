@@ -2,4 +2,4 @@
 	HELLO
 {{/macro}}
 
-{{[size: myMacro]->size()}}
+{{rand()}}

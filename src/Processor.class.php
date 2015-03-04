@@ -231,33 +231,23 @@ class Histone_Processor {
 	}
 
 	private static function processProperty($node, $runtime) {
-		$left = self::processNode2($node[1], $runtime);
-		$right = self::processNode2($node[2], $runtime);
-		return Histone_RTTI::getProperty($left, $right);
+		return Histone_RTTI::getProperty(
+			self::processNode2($node[1], $runtime),
+			self::processNode2($node[2], $runtime)
+		);
 	}
 
 
 	private static function processCall($node, $runtime) {
-
 		$args = [];
 		for ($c = 2, $cnt = count($node); $c < $cnt; ++$c)
 			array_push($args, self::processNode2($node[$c], $runtime));
-
-		$thisObj = null;
-
 		$callee = self::processNode2($node[1], $runtime);
-
-		if ($callee instanceof Histone_Method) {
+		if ($callee instanceof Histone_Method)
 			return $callee->call($args, $runtime);
-		}
-
-		if ($callee instanceof Histone_Macro) {
-
+		if ($callee instanceof Histone_Macro)
 			return $callee->call($args, $runtime);
-		}
-
 		return Histone_RTTI::getUndefined();
-
 	}
 
 	private static function processMacro($node, $runtime) {
