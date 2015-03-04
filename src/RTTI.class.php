@@ -9,8 +9,8 @@ require_once('rtti/String.class.php');
 require_once('rtti/Number.class.php');
 require_once('rtti/RegExp.class.php');
 require_once('rtti/Global.class.php');
-require_once('rtti/Closure.class.php');
-require_once('rtti/undefined.class.php');
+require_once('rtti/Method.class.php');
+require_once('rtti/Undefined.class.php');
 
 class Histone_RTTI {
 
@@ -57,18 +57,10 @@ class Histone_RTTI {
 		}
 	}
 
-	static function toPrimitive($value) {
-		while ($value instanceof Histone_Get)
-			$value = self::get($value->left, $value->right);
-		return $value;
-	}
 
-	static function get($value, $name) {
+	static function getMethod($value, $name) {
 
 		$typeInfo = &self::$typeInfo;
-
-
-		$value = self::toPrimitive($value);
 		$type = self::getType($value);
 
 		if (!array_key_exists($type, $typeInfo)) {
@@ -76,46 +68,63 @@ class Histone_RTTI {
 			$type = 'type';
 		}
 
-		$getter = null;
+		$checkTypes = [$type, 'type'];
+
+		foreach ($checkTypes as $checkType) {
+			$checkType = $typeInfo[$checkType];
+			if (@array_key_exists($name, $checkType['members'])) {
+				return $checkType['members'][$name];
+			}
+		}
+
+		return self::getUndefined();
+
+	}
+
+	static function getProperty($value, $name) {
+
+		$typeInfo = &self::$typeInfo;
+		$type = self::getType($value);
+
+		if (!array_key_exists($type, $typeInfo)) {
+			$value = self::getUndefined();
+			$type = 'type';
+		}
 
 		$checkTypes = [$type, 'type'];
 
 		foreach ($checkTypes as $checkType) {
-
 			$checkType = $typeInfo[$checkType];
 
-			if (@array_key_exists($name, $checkType['members'])) {
-				return $checkType['members'][$name];
-			}
+			// if (@array_key_exists($name, $checkType['members'])) {
+				// return $checkType['members'][$name];
+			// }
 
-			else if (is_null($getter) && array_key_exists('__get', $checkType)) {
-				$getter = $checkType['__get'];
+			if (array_key_exists('__get', $checkType)) {
+				return $checkType['__get']($value, $name);
 			}
 
 		}
 
-		if (!is_null($getter))
-			return $getter($value, $name);
+		// if (!is_null($getter))
+
 
 		return self::getUndefined();
 
 	}
 
 	static function toString($value) {
-		$value = self::toPrimitive($value);
-		$toString = self::get($value, 'toString');
+		$toString = self::getMethod($value, 'toString');
 		return $toString($value);
 	}
 
 	static function toBoolean($value) {
-		$value = self::toPrimitive($value);
-		$toBoolean = self::get($value, 'toBoolean');
+		$toBoolean = self::getMethod($value, 'toBoolean');
 		return $toBoolean($value);
 	}
 
 	static function toJSON($value) {
-		$value = self::toPrimitive($value);
-		$toJSON = self::get($value, 'toJSON');
+		$toJSON = self::getMethod($value, 'toJSON');
 		return $toJSON($value);
 	}
 

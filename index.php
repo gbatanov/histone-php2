@@ -1,12 +1,6 @@
 <?php
 	require_once('src/Histone.class.php');
 	header('Content-type: text/html; charset=utf-8');
-?>
-
-<link rel="stylesheet" href="style.css" />
-
-<?php
-
 
 	$template = file_get_contents('template.tpl');
 	$template = $Histone($template);

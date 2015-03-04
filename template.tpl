@@ -1,1 +1,5 @@
-{{getBaseURI()}}
+{{macro myMacro}}
+	HELLO
+{{/macro}}
+
+{{rand()}}

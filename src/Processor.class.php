@@ -13,17 +13,6 @@ class Histone_Return {
 
 }
 
-class Histone_Get {
-
-	public $left;
-	public $right;
-
-	function __construct($left, $right) {
-		$this->left = $left;
-		$this->right = $right;
-	}
-
-}
 
 class Histone_Processor {
 
@@ -72,8 +61,6 @@ class Histone_Processor {
 	private static function processAddition($node, $runtime) {
 		$left = self::processNode2($node[1], $runtime);
 		$right = self::processNode2($node[2], $runtime);
-		$left = Histone_RTTI::toPrimitive($left);
-		$right = Histone_RTTI::toPrimitive($right);
 		if (!(is_string($left) || is_string($right))) {
 			if (is_numeric($left) || is_numeric($right)) {
 				if (is_numeric($left)) $left = floatval($left);
@@ -91,12 +78,10 @@ class Histone_Processor {
 
 	private static function processArithmetical($type, $node, $runtime) {
 		$left = self::processNode2($node[1], $runtime);
-		$left = Histone_RTTI::toPrimitive($left);
 		if (is_numeric($left)) $left = floatval($left);
 		if (!self::is_number($left)) return Histone_RTTI::getUndefined();
 		if ($type === Histone_Constants::T_USUB) return (-$left);
 		$right = self::processNode2($node[2], $runtime);
-		$right = Histone_RTTI::toPrimitive($right);
 		if (is_numeric($right)) $right = floatval($right);
 		if (!self::is_number($right)) return Histone_RTTI::getUndefined();
 
@@ -112,8 +97,6 @@ class Histone_Processor {
 
 		$left = self::processNode2($node[1], $runtime);
 		$right = self::processNode2($node[2], $runtime);
-		$left = Histone_RTTI::toPrimitive($left);
-		$right = Histone_RTTI::toPrimitive($right);
 
 		if (is_string($left) && self::is_number($right)) {
 			if (is_numeric($left)) $left = floatval($left);
@@ -147,8 +130,6 @@ class Histone_Processor {
 
 		$left = self::processNode2($node[1], $runtime);
 		$right = self::processNode2($node[2], $runtime);
-		$left = Histone_RTTI::toPrimitive($left);
-		$right = Histone_RTTI::toPrimitive($right);
 
 		if (is_string($left) && self::is_number($right)) {
 			if (is_numeric($left)) $left = floatval($left);
@@ -236,30 +217,37 @@ class Histone_Processor {
 		return $result;
 	}
 
-	private static function processCall($node, $runtime) {
+	private static function processMethod($node, $runtime) {
 
-		$args = [];
-		for ($c = 2, $cnt = count($node); $c < $cnt; ++$c)
-			array_push($args, self::processNode2($node[$c], $runtime));
+		$left = self::processNode2($node[1], $runtime);
+		$right = Histone_RTTI::getMethod($left, $node[2]);
 
-		$thisObj = null;
-
-		$callee = self::processNode2($node[1], $runtime);
-
-		while ($callee instanceof Histone_Get) {
-			$thisObj = Histone_RTTI::toPrimitive($callee->left);
-			$callee = Histone_RTTI::get($thisObj, $callee->right);
-		}
-
-		if ($callee instanceof Closure)
-			return $callee($thisObj, $args, $runtime);
-
-		if ($callee instanceof Histone_Macro) {
-			return $callee->call($args, $runtime);
-		}
+		if ($right instanceof Closure)
+			return new Histone_Method($left, $right);
 
 		return Histone_RTTI::getUndefined();
 
+
+	}
+
+	private static function processProperty($node, $runtime) {
+		return Histone_RTTI::getProperty(
+			self::processNode2($node[1], $runtime),
+			self::processNode2($node[2], $runtime)
+		);
+	}
+
+
+	private static function processCall($node, $runtime) {
+		$args = [];
+		for ($c = 2, $cnt = count($node); $c < $cnt; ++$c)
+			array_push($args, self::processNode2($node[$c], $runtime));
+		$callee = self::processNode2($node[1], $runtime);
+		if ($callee instanceof Histone_Method)
+			return $callee->call($args, $runtime);
+		if ($callee instanceof Histone_Macro)
+			return $callee->call($args, $runtime);
+		return Histone_RTTI::getUndefined();
 	}
 
 	private static function processMacro($node, $runtime) {
@@ -290,8 +278,6 @@ class Histone_Processor {
 		}
 		return $result;
 	}
-
-
 
 	public static function processNode($node, $runtime) {
 
@@ -349,10 +335,12 @@ class Histone_Processor {
 			case Histone_Constants::T_THIS: return $runtime->thisObj;
 			case Histone_Constants::T_GLOBAL: return Histone_RTTI::getGlobal();
 			case Histone_Constants::T_FOR: return self::processFor($node, $runtime);
-			case Histone_Constants::T_GET: return self::processGet($node, $runtime);
 			case Histone_Constants::T_CALL: return self::processCall($node, $runtime);
 			case Histone_Constants::T_MACRO: return self::processMacro($node, $runtime);
 			case Histone_Constants::T_NODES: return self::processNodes($node, $runtime);
+
+			case Histone_Constants::T_PROP: return self::processProperty($node, $runtime);
+			case Histone_Constants::T_METHOD: return self::processMethod($node, $runtime);
 
 			default: throw new Exception($type);
 

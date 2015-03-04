@@ -39,7 +39,8 @@ class Histone_Constants {
 	const T_REF = 'T_REF';
 
 
-	const T_GET = 'T_GET';
+	const T_METHOD = 'T_METHOD';
+	const T_PROP = 'T_PROP';
 	const T_CALL = 'T_CALL';
 
 	const T_VAR = 'T_VAR';
