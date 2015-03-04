@@ -10,7 +10,6 @@ require_once('rtti/Number.class.php');
 require_once('rtti/RegExp.class.php');
 require_once('rtti/Global.class.php');
 require_once('rtti/Method.class.php');
-require_once('rtti/Closure.class.php');
 require_once('rtti/Undefined.class.php');
 
 class Histone_RTTI {
