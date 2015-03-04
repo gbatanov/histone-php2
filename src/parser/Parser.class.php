@@ -121,6 +121,7 @@ class Histone_Parser {
 			$tokenizer->literal('*}}');
 			$tokenizer->literal('}}');
 			$tokenizer->literal('{{');
+			$tokenizer->literal('->');
 			$tokenizer->literal('!=');
 			$tokenizer->literal('||');
 			$tokenizer->literal('&&');
@@ -274,13 +275,19 @@ class Histone_Parser {
 		$result = self::PrimaryExpression($ctx);
 
 		for (;;) if ($ctx->next('.')) {
-			$result = [Histone_Constants::T_GET, $result];
+			$result = [Histone_Constants::T_PROP, $result];
+			if (!$ctx->test($ctx->PROP)) $ctx->error('PROP');
+			array_push($result, $ctx->next()['value']);
+		}
+
+		else if ($ctx->next('->')) {
+			$result = [Histone_Constants::T_METHOD, $result];
 			if (!$ctx->test($ctx->PROP)) $ctx->error('PROP');
 			array_push($result, $ctx->next()['value']);
 		}
 
 		else if ($ctx->next('[')) {
-			$result = [Histone_Constants::T_GET, $result];
+			$result = [Histone_Constants::T_PROP, $result];
 			array_push($result, self::Expression($ctx));
 			if (!$ctx->next(']')) $ctx->error(']');
 		}
